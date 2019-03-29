@@ -19,7 +19,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
-    name='cbpro',
+    name='taxbit-cbpro',
     version='1.1.4',
     author='Daniel Paquin',
     author_email='dpaq34@gmail.com',
