@@ -24,7 +24,6 @@ class AuthenticatedClient(PublicClient):
     Attributes:
         url (str): The api url for this client instance to use.
         auth (CBProAuth): Custom authentication handler for each request.
-        session (requests.Session): Persistent HTTP connection object.
     """
     def __init__(self, key, b64secret, passphrase,
                  api_url="https://api.pro.coinbase.com"):
@@ -38,7 +37,6 @@ class AuthenticatedClient(PublicClient):
         """
         super(AuthenticatedClient, self).__init__(api_url)
         self.auth = CBProAuth(key, b64secret, passphrase)
-        self.session = requests.Session()
 
     def get_account(self, account_id):
         """ Get information for a single account.

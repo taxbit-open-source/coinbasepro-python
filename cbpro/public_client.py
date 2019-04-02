@@ -5,6 +5,8 @@
 # For public requests to the Coinbase exchange
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 
 class PublicClient(object):
@@ -27,7 +29,23 @@ class PublicClient(object):
         """
         self.url = api_url.rstrip('/')
         self.auth = None
-        self.session = requests.Session()
+        self.session = self.requests_retry_session()
+        self.timeout = timeout
+
+    @staticmethod
+    def requests_retry_session(retries=3, backoff_factor=0.3, status_forcelist=(500, 502, 504, 429), session=None):
+        session = session or requests.Session()
+        retry = Retry(
+            total=retries,
+            read=retries,
+            connect=retries,
+            backoff_factor=backoff_factor,
+            status_forcelist=status_forcelist,
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        return session
 
     def get_products(self):
         """Get a list of available currency pairs for trading.
@@ -85,9 +103,7 @@ class PublicClient(object):
 
         """
         params = {'level': level}
-        return self._send_message('get',
-                                  '/products/{}/book'.format(product_id),
-                                  params=params)
+        return self._send_message('get', '/products/{}/book'.format(product_id), params=params)
 
     def get_product_ticker(self, product_id):
         """Snapshot about the last trade (tick), best bid/ask and 24h volume.
@@ -111,8 +127,7 @@ class PublicClient(object):
                 }
 
         """
-        return self._send_message('get',
-                                  '/products/{}/ticker'.format(product_id))
+        return self._send_message('get', '/products/{}/ticker'.format(product_id))
 
     def get_product_trades(self, product_id, before='', after='', limit=None, result=None):
         """List the latest trades for a product.
@@ -143,11 +158,9 @@ class PublicClient(object):
                      "side": "sell"
          }]
         """
-        return self._send_paginated_message('/products/{}/trades'
-                                            .format(product_id))
+        return self._send_paginated_message(f'/products/{product_id}/trades')
 
-    def get_product_historic_rates(self, product_id, start=None, end=None,
-                                   granularity=None):
+    def get_product_historic_rates(self, product_id, start=None, end=None, granularity=None):
         """Historic rates for a product.
 
         Rates are returned in grouped buckets based on requested
@@ -189,15 +202,13 @@ class PublicClient(object):
         if end is not None:
             params['end'] = end
         if granularity is not None:
-            acceptedGrans = [60, 300, 900, 3600, 21600, 86400]
-            if granularity not in acceptedGrans:
-                raise ValueError( 'Specified granularity is {}, must be in approved values: {}'.format(
-                        granularity, acceptedGrans) )
+            accepted_grans = [60, 300, 900, 3600, 21600, 86400]
+            if granularity not in accepted_grans:
+                raise ValueError(f'Specified granularity is {granularity}, '
+                                 f'must be in approved values: {accepted_grans}')
 
             params['granularity'] = granularity
-        return self._send_message('get',
-                                  '/products/{}/candles'.format(product_id),
-                                  params=params)
+        return self._send_message('get', '/products/{}/candles'.format(product_id), params=params)
 
     def get_product_24hr_stats(self, product_id):
         """Get 24 hr stats for the product.
@@ -216,8 +227,7 @@ class PublicClient(object):
                     }
 
         """
-        return self._send_message('get',
-                                  '/products/{}/stats'.format(product_id))
+        return self._send_message('get', f'/products/{product_id}/stats')
 
     def get_currencies(self):
         """List known currencies.
@@ -265,8 +275,7 @@ class PublicClient(object):
 
         """
         url = self.url + endpoint
-        r = self.session.request(method, url, params=params, data=data,
-                                 auth=self.auth, timeout=30)
+        r = self.session.request(method, url, params=params, data=data, auth=self.auth, timeout=30)
         return r.json()
 
     def _send_paginated_message(self, endpoint, params=None):

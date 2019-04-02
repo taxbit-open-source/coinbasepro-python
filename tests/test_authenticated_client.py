@@ -15,28 +15,23 @@ def dc():
 class TestAuthenticatedClientSyntax(object):
     def test_place_order_input_1(self, dc):
         with pytest.raises(ValueError):
-            r = dc.place_order('BTC-USD', 'buy', 'market',
-                               overdraft_enabled='true', funding_amount=10)
+            r = dc.place_order('BTC-USD', 'buy', 'market', overdraft_enabled='true', funding_amount=10)
 
     def test_place_order_input_2(self, dc):
         with pytest.raises(ValueError):
-            r = dc.place_order('BTC-USD', 'buy', 'limit',
-                               cancel_after='123', time_in_force='ABC')
+            r = dc.place_order('BTC-USD', 'buy', 'limit', cancel_after='123', time_in_force='ABC')
 
     def test_place_order_input_3(self, dc):
         with pytest.raises(ValueError):
-            r = dc.place_order('BTC-USD', 'buy', 'limit',
-                               post_only='true', time_in_force='FOK')
+            r = dc.place_order('BTC-USD', 'buy', 'limit', post_only='true', time_in_force='FOK')
 
     def test_place_order_input_4(self, dc):
         with pytest.raises(ValueError):
-            r = dc.place_order('BTC-USD', 'buy', 'market',
-                               size=None, funds=None)
+            r = dc.place_order('BTC-USD', 'buy', 'market', size=None, funds=None)
 
     def test_place_order_input_5(self, dc):
         with pytest.raises(ValueError):
-            r = dc.place_order('BTC-USD', 'buy', 'market',
-                               size=1, funds=1)
+            r = dc.place_order('BTC-USD', 'buy', 'market', size=1, funds=1)
 
 
 @pytest.fixture(scope='module')

@@ -8,12 +8,13 @@ install_requires = [
     'six>=1.10.0',
     'websocket-client>=0.40.0',
     'pymongo>=3.5.1',
+    'urllib3'
 ]
 
 tests_require = [
     'pytest',
     'python-dateutil>=2.7.5',
-    ]
+]
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -44,12 +45,8 @@ setup(
         'Intended Audience :: Information Technology',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 )
