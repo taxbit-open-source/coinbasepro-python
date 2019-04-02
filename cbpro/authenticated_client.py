@@ -223,33 +223,24 @@ class AuthenticatedClient(PublicClient):
 
         """
         # Margin parameter checks
-        if kwargs.get('overdraft_enabled') is not None and \
-                kwargs.get('funding_amount') is not None:
+        if kwargs.get('overdraft_enabled') is not None and kwargs.get('funding_amount') is not None:
             raise ValueError('Margin funding must be specified through use of '
-                             'overdraft or by setting a funding amount, but not'
-                             ' both')
+                             'overdraft or by setting a funding amount, but not both')
 
         # Limit order checks
         if order_type == 'limit':
-            if kwargs.get('cancel_after') is not None and \
-                    kwargs.get('time_in_force') != 'GTT':
-                raise ValueError('May only specify a cancel period when time '
-                                 'in_force is `GTT`')
-            if kwargs.get('post_only') is not None and kwargs.get('time_in_force') in \
-                    ['IOC', 'FOK']:
-                raise ValueError('post_only is invalid when time in force is '
-                                 '`IOC` or `FOK`')
+            if kwargs.get('cancel_after') is not None and kwargs.get('time_in_force') != 'GTT':
+                raise ValueError('May only specify a cancel period when time in_force is `GTT`')
+            if kwargs.get('post_only') is not None and kwargs.get('time_in_force') in ['IOC', 'FOK']:
+                raise ValueError('post_only is invalid when time in force is `IOC` or `FOK`')
 
         # Market and stop order checks
         if order_type == 'market' or order_type == 'stop':
             if not (kwargs.get('size') is None) ^ (kwargs.get('funds') is None):
-                raise ValueError('Either `size` or `funds` must be specified '
-                                 'for market/stop orders (but not both).')
+                raise ValueError('Either `size` or `funds` must be specified for market/stop orders (but not both).')
 
         # Build params dict
-        params = {'product_id': product_id,
-                  'side': side,
-                  'type': order_type}
+        params = {'product_id': product_id, 'side': side, 'type': order_type}
         params.update(kwargs)
         return self._send_message('post', '/orders', data=json.dumps(params))
 
@@ -832,11 +823,10 @@ class AuthenticatedClient(PublicClient):
                 }
 
         """
-        params = {'amount': amount,
-                  'currency': currency,
-                  'payment_method_id': payment_method_id}
         return self._send_message('post', '/withdrawals/payment-method',
-                                  data=json.dumps(params))
+                                  data=json.dumps({
+                                      'amount': amount, 'currency': currency,
+                                      'payment_method_id': payment_method_id}))
 
     def coinbase_withdraw(self, amount, currency, coinbase_account_id):
         """ Withdraw funds to a coinbase account.

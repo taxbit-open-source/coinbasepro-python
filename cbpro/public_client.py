@@ -127,7 +127,7 @@ class PublicClient(object):
                 }
 
         """
-        return self._send_message('get', '/products/{}/ticker'.format(product_id))
+        return self._send_message('get', f'/products/{product_id}/ticker')
 
     def get_product_trades(self, product_id, before='', after='', limit=None, result=None):
         """List the latest trades for a product.
@@ -208,7 +208,7 @@ class PublicClient(object):
                                  f'must be in approved values: {accepted_grans}')
 
             params['granularity'] = granularity
-        return self._send_message('get', '/products/{}/candles'.format(product_id), params=params)
+        return self._send_message('get', f'/products/{product_id}/candles', params=params)
 
     def get_product_24hr_stats(self, product_id):
         """Get 24 hr stats for the product.
@@ -274,9 +274,7 @@ class PublicClient(object):
             dict/list: JSON response
 
         """
-        url = self.url + endpoint
-        r = self.session.request(method, url, params=params, data=data, auth=self.auth, timeout=30)
-        return r.json()
+        return self.session.request(method, self.url + endpoint, params=params, data=data, auth=self.auth).json()
 
     def _send_paginated_message(self, endpoint, params=None):
         """ Send API message that results in a paginated response.
@@ -305,7 +303,7 @@ class PublicClient(object):
             params = dict()
         url = self.url + endpoint
         while True:
-            r = self.session.get(url, params=params, auth=self.auth, timeout=30)
+            r = self.session.get(url, params=params, auth=self.auth)
             results = r.json()
             for result in results:
                 yield result
@@ -313,8 +311,7 @@ class PublicClient(object):
             # param to get next page.
             # If this request included `before` don't get any more pages - the
             # cbpro API doesn't support multiple pages in that case.
-            if not r.headers.get('cb-after') or \
-                    params.get('before') is not None:
+            if not r.headers.get('cb-after') or params.get('before') is not None:
                 break
             else:
                 params['after'] = r.headers['cb-after']
