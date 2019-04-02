@@ -29,14 +29,13 @@ class PublicClient(object):
         """
         self.url = api_url.rstrip('/')
         self.auth = None
-        self.session = self.requests_retry_session()
+        self.session = requests.Session()
         self.timeout = timeout
 
     @staticmethod
     def requests_retry_session(retries=3, backoff_factor=0.3, status_forcelist=(500, 502, 504, 429), session=None):
         session = session or requests.Session()
         retry = Retry(
-            total=retries,
             read=retries,
             connect=retries,
             backoff_factor=backoff_factor,
@@ -274,7 +273,8 @@ class PublicClient(object):
             dict/list: JSON response
 
         """
-        return self.session.request(method, self.url + endpoint, params=params, data=data, auth=self.auth).json()
+        return self.session.request(method, self.url + endpoint, params=params, data=data, auth=self.auth,
+                                    timeout=self.timeout).json()
 
     def _send_paginated_message(self, endpoint, params=None):
         """ Send API message that results in a paginated response.
@@ -303,7 +303,7 @@ class PublicClient(object):
             params = dict()
         url = self.url + endpoint
         while True:
-            r = self.session.get(url, params=params, auth=self.auth)
+            r = self.session.get(url, params=params, auth=self.auth, timeout=self.timeout)
             results = r.json()
             for result in results:
                 yield result
