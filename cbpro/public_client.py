@@ -31,6 +31,11 @@ class PublicClient(object):
         self.auth = None
         self.session = requests.Session()
         self.timeout = timeout
+        self.proxies = {}
+
+    def set_proxy(self, proxy_url):
+        self.proxies = {'http': proxy_url,
+                        'https': proxy_url}
 
     @staticmethod
     def requests_retry_session(retries=3, backoff_factor=0.3, status_forcelist=(500, 502, 504, 429), session=None):
@@ -274,7 +279,7 @@ class PublicClient(object):
 
         """
         return self.session.request(method, self.url + endpoint, params=params, data=data, auth=self.auth,
-                                    timeout=self.timeout).json()
+                                    timeout=self.timeout, proxies=self.proxies).json()
 
     def _send_paginated_message(self, endpoint, params=None):
         """ Send API message that results in a paginated response.
@@ -303,7 +308,7 @@ class PublicClient(object):
             params = dict()
         url = self.url + endpoint
         while True:
-            r = self.session.get(url, params=params, auth=self.auth, timeout=self.timeout)
+            r = self.session.get(url, params=params, auth=self.auth, timeout=self.timeout, proxies=self.proxies)
             results = r.json()
             for result in results:
                 yield result
